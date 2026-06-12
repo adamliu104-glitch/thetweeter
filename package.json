@@ -1,7 +1,7 @@
 {
-  "name": "boontweet",
+  "name": "thetweeter",
   "version": "1.0.0",
-  "description": "BoonTweet - a minimal Twitter clone for a class project.",
+  "description": "TheTweeter - a minimal Twitter clone for a class project.",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js"

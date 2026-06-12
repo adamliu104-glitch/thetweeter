@@ -7,6 +7,8 @@ const path = require('path');
 const express = require('express');
 const session = require('express-session');
 
+const { initSchema } = require('./db'); // creates the database tables on startup
+
 // Route modules. auth.js exports { router, requireLogin }, so we pull out
 // just the router here.
 const { router: authRouter } = require('./routes/auth');
@@ -52,6 +54,18 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 // --- Start the server ----------------------------------------------
 // Render provides PORT; locally we default to 3000.
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`BoonTweet running at http://localhost:${PORT}`);
-});
+
+// Make sure the database tables exist BEFORE we start accepting requests.
+// If the schema can't be set up (e.g. the database is unreachable), we log the
+// error and exit so the platform can restart us, instead of serving an app that
+// would fail on every request.
+initSchema()
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`TheTweeter running at http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error('Could not initialize the database schema:', err);
+    process.exit(1);
+  });

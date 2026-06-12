@@ -1,4 +1,4 @@
-# BoonTweet
+# TheTweeter
 
 A minimal Twitter clone built for a class project. The goal is **clarity and
 learnability**: plain HTML/CSS/vanilla JavaScript on the front end, Node.js +
@@ -63,20 +63,22 @@ npm install
 # 2. Create the database (Postgres must be running)
 createdb boontweet
 
-# 3. Load the schema — creates the users, posts, and likes tables
-psql boontweet -f schema.sql
-
-# 4. Create your local environment file from the example
+# 3. Create your local environment file from the example
 cp .env.example .env
 #    The defaults in .env already work for a standard local Postgres.
 #    Open .env and adjust DATABASE_URL only if your setup is different.
 
-# 5. Start the server
+# 4. Start the server — it creates the tables automatically on first run
 npm start
 ```
 
 Now open **http://localhost:3000**. Because there are no seeded accounts,
 **sign up first** (pick any username + password), then start tweeting.
+
+> **No manual schema step needed.** On startup the app runs `schema.sql` for
+> you (it uses `CREATE TABLE IF NOT EXISTS`, so it's safe every time). If you'd
+> rather load it by hand, you still can: `psql boontweet -f schema.sql`.
+> To wipe your local data, drop and recreate: `dropdb boontweet && createdb boontweet`.
 
 > **Don't have PostgreSQL yet? (macOS + Homebrew)**
 >
@@ -88,26 +90,27 @@ Now open **http://localhost:3000**. Because there are no seeded accounts,
 > source ~/.zshrc                             # or open a new terminal
 > ```
 >
-> Now `createdb` and `psql` will be found, and you can run steps 2–3 above.
+> Now `createdb` and `psql` will be found, and you can run the steps above.
 
 ---
 
 ## Project structure
 
 ```
-boontweet/
+thetweeter/
 ├── public/              # Front end (served as static files by Express)
 │   ├── index.html       # Page layout: auth form, compose box, feed
 │   ├── style.css        # Hand-written CSS, no framework
 │   └── app.js           # All client logic (fake data + real fetch calls)
 ├── src/
 │   ├── server.js        # Express app: middleware, routes, static files, start
-│   ├── db.js            # One shared PostgreSQL connection pool
+│   ├── db.js            # Shared PostgreSQL pool + startup schema setup
 │   └── routes/
 │       ├── auth.js      # signup / login / logout / me  + the login guard
 │       ├── posts.js     # the feed and all tweet actions
-│       └── users.js     # public profiles
-├── schema.sql           # CREATE TABLE statements (run once)
+│       └── users.js     # public profiles + avatar upload
+├── schema.sql           # CREATE TABLE statements (auto-loaded on startup)
+├── render.yaml          # Render Blueprint: web service + database, auto-wired
 ├── .env.example         # Template for PORT, DATABASE_URL, SESSION_SECRET
 ├── package.json         # Dependencies + the "start" script
 └── README.md
@@ -138,55 +141,45 @@ sends a user id).
 
 ## Deploy to Render
 
-Render gives you a web service and a managed PostgreSQL database that talk to
-each other. The two **must be in the same region**.
+This repo includes a [`render.yaml`](render.yaml) **Blueprint**, so Render can
+create the web service *and* the PostgreSQL database for you, already wired
+together — and the app sets up its own tables on first boot.
 
-### 1. Push your code to GitHub
+### Deploy with the Blueprint (recommended)
 
-Render deploys from a Git repository, so commit and push this project to a
-GitHub repo first.
+1. Push this repo to GitHub (already done if you cloned it from there).
+2. In the [Render dashboard](https://dashboard.render.com): **New + → Blueprint**.
+3. Connect this repository. Render reads `render.yaml` and shows you a plan: a
+   web service (`thetweeter`) and a database (`thetweeter-db`).
+4. Click **Apply**. Render then:
+   - creates the database,
+   - builds the web service (`npm install`),
+   - injects `DATABASE_URL` (from the database) and a generated `SESSION_SECRET`,
+   - starts it (`npm start`), at which point **the app creates its own tables**.
+5. Open the web service's URL, sign up, and you're live.
 
-### 2. Create the PostgreSQL database
+> Both services are pinned to the **same region** (`oregon`) in `render.yaml` so
+> they talk over Render's fast private network — change both together if you
+> want a different one. The free database tier is perfect for a demo but expires
+> after ~30 days.
 
-1. In the [Render dashboard](https://dashboard.render.com), click
-   **New → Postgres**.
-2. Give it a name (e.g. `boontweet-db`) and **note the Region** you pick —
-   you'll use the same one for the web service.
-3. Create it, then open it and copy two things from the **Connections** panel:
-   - the **Internal Database URL** (used by your web service)
-   - the **External Database URL** (used once, from your laptop, to load the schema)
+### Manual alternative (no Blueprint)
 
-### 3. Load the schema once
+Prefer to click through it yourself? Create a **Postgres** instance and a **Web
+Service** from the same repo, in the **same region**, then on the web service set:
 
-From your own machine, run the schema against the new database using the
-**External** URL you just copied:
+- **Build Command:** `npm install`
+- **Start Command:** `npm start`
+- **Environment →** `DATABASE_URL` = the database's **Internal Database URL**,
+  and `SESSION_SECRET` = any long random string. (Leave `PORT` alone — Render
+  sets it.)
 
-```bash
-psql "PASTE_EXTERNAL_DATABASE_URL_HERE" -f schema.sql
-```
-
-This creates the `users`, `posts`, and `likes` tables. You only do this once.
-
-### 4. Create the web service
-
-1. Click **New → Web Service** and connect your GitHub repo.
-2. **Region:** choose the **same region** as your database (important — this
-   lets them use the fast internal network).
-3. **Build Command:** `npm install`
-4. **Start Command:** `npm start`
-5. Under **Environment**, add these variables:
-   - `DATABASE_URL` → paste the **Internal Database URL** from step 2.
-   - `SESSION_SECRET` → any long, random string.
-   - (You do **not** set `PORT` — Render provides it automatically, and the
-     app already reads it.)
-6. Click **Create Web Service**.
-
-Render installs the dependencies, starts the server, and gives you a public
-URL. Open it, sign up, and you're live.
+You do **not** need to load `schema.sql` by hand — the app does it on startup.
 
 > **Notes for the curious:**
-> - `src/db.js` turns on SSL automatically for any non-localhost database, which
->   is what Render's managed Postgres requires.
+> - `src/db.js` turns on SSL automatically for any non-localhost database (which
+>   Render's managed Postgres requires) and runs `schema.sql` on boot — safe to
+>   repeat thanks to `CREATE TABLE IF NOT EXISTS`.
 > - Login sessions are kept in memory, so they reset whenever the service
 >   restarts (fine for a class project). A production app would store sessions
 >   in the database instead.
