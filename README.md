@@ -5,6 +5,8 @@ learnability**: plain HTML/CSS/vanilla JavaScript on the front end, Node.js +
 Express + PostgreSQL on the back end, and generous comments throughout that
 explain *why*, not just *what*.
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/adamliu104-glitch/thetweeter)
+
 ## Features
 
 - Post a tweet (1–280 characters)
@@ -146,6 +148,13 @@ create the web service *and* the PostgreSQL database for you, already wired
 together — and the app sets up its own tables on first boot.
 
 ### Deploy with the Blueprint (recommended)
+
+**One click:**
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/adamliu104-glitch/thetweeter)
+— opens Render with this repo's blueprint pre-loaded; review the plan and click
+**Apply**. It creates the web service + database and wires `DATABASE_URL` for you.
+
+Or step by step:
 
 1. Push this repo to GitHub (already done if you cloned it from there).
 2. In the [Render dashboard](https://dashboard.render.com): **New + → Blueprint**.

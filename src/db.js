@@ -17,6 +17,19 @@ const { Pool } = require('pg');
 const connectionString =
   process.env.DATABASE_URL || 'postgres://localhost:5432/boontweet';
 
+// Helpful failure mode: on a hosted platform (Render sets RENDER=true) we must
+// never fall back to localhost. If DATABASE_URL is missing there, say so loudly.
+// Otherwise the only symptom is a confusing "ECONNREFUSED 127.0.0.1:5432" as the
+// app tries to reach a database that isn't running inside its container.
+if (!process.env.DATABASE_URL && process.env.RENDER) {
+  console.error(
+    '\n*** DATABASE_URL is not set on this service. ***\n' +
+      'It fell back to localhost, which has no database here.\n' +
+      'Fix: link your Postgres in the Render Environment tab, or deploy via\n' +
+      'render.yaml (Blueprint) so DATABASE_URL is wired automatically.\n'
+  );
+}
+
 // Hosted Postgres (like Render's) requires an SSL connection; a local
 // database does not. We enable SSL only when we're NOT talking to localhost.
 const isLocal =
