@@ -1,0 +1,375 @@
+/* style.css
+   Hand-written CSS for BoonTweet. No framework on purpose, so every rule
+   is something you can read and explain. Layout is a single centered
+   column, like a real timeline. */
+
+/* A few shared values kept in one place (CSS custom properties / variables)
+   so colors and sizes are easy to tweak from the top of the file. */
+:root {
+  --blue: #1d9bf0;          /* primary accent (buttons, links) */
+  --blue-dark: #1a8cd8;     /* hover state for the accent */
+  --red: #e0245e;           /* the "liked" heart color */
+  --border: #e6ecf0;        /* light gray divider lines */
+  --text: #0f1419;          /* main text */
+  --muted: #536471;         /* secondary / timestamp text */
+  --bg: #f7f9fa;            /* page background */
+  --max-width: 600px;       /* timeline column width */
+}
+
+/* Reset the basics so the layout is predictable across browsers. */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.4;
+}
+
+/* Utility class: app.js adds/removes "hidden" to show or hide elements. */
+.hidden {
+  display: none !important;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* --- Top bar ------------------------------------------------------- */
+.topbar {
+  position: sticky;       /* stays at the top while you scroll the feed */
+  top: 0;
+  background: #fff;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  z-index: 10;
+}
+
+.logo {
+  color: var(--blue);
+  font-size: 1.4rem;
+  cursor: pointer; /* it doubles as the "back to feed" link */
+  display: flex; /* sit the bird and the text side by side */
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.logo-bird {
+  flex-shrink: 0; /* keep the bird from squishing on narrow screens */
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+}
+
+/* --- Main column --------------------------------------------------- */
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+/* --- Auth panel (login / signup) ---------------------------------- */
+.auth-panel {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.auth-panel h2 {
+  margin-bottom: 0.5rem;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* --- Compose box --------------------------------------------------- */
+.compose {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+#tweet-input {
+  width: 100%;
+  border: none;
+  resize: vertical;
+  min-height: 60px;
+  font-size: 1.1rem;
+  font-family: inherit;
+}
+
+#tweet-input:focus {
+  outline: none;
+}
+
+.compose-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.char-count {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Turns red when the user is almost out of characters (set by app.js). */
+.char-count.warn {
+  color: var(--red);
+}
+
+/* --- Shared input + button styles --------------------------------- */
+input[type="text"],
+input[type="password"] {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+input:focus {
+  outline: 2px solid var(--blue);
+  border-color: var(--blue);
+}
+
+button {
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 999px; /* fully rounded "pill" buttons */
+  padding: 0.55rem 1.2rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--blue-dark);
+}
+
+/* A lighter, secondary button (used for "Sign up" and "Log out"). */
+button.secondary {
+  background: #fff;
+  color: var(--blue);
+  border: 1px solid var(--blue);
+}
+
+button.secondary:hover {
+  background: #f0f8ff;
+}
+
+/* --- Profile header ----------------------------------------------- */
+.profile-header {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.profile-header h2 {
+  color: var(--text);
+}
+
+.back-home {
+  display: inline-block;
+  margin-bottom: 0.75rem;
+  color: var(--blue);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+/* --- Avatars (profile photos) ------------------------------------- */
+.avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%; /* a circle */
+  object-fit: cover; /* crop non-square photos instead of stretching them */
+  background: #e6ecf0; /* fallback gray */
+  flex-shrink: 0;
+}
+
+.avatar-sm {
+  width: 32px;
+  height: 32px;
+}
+
+.avatar-lg {
+  width: 80px;
+  height: 80px;
+}
+
+/* No photo? Show a colored circle with the user's first initial instead. */
+.avatar-placeholder {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--blue);
+  color: #fff;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.avatar-placeholder.avatar-lg {
+  font-size: 2rem;
+}
+
+/* Profile header: big avatar next to the name. */
+.profile-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* The "change my photo" controls — only shown on your OWN profile. */
+.avatar-upload {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.avatar-upload input[type="file"] {
+  font-size: 0.9rem;
+}
+
+/* --- Feed + tweets ------------------------------------------------- */
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tweet {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.tweet-head {
+  display: flex;
+  align-items: center; /* line the small avatar up with the name + time */
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.tweet-author {
+  font-weight: 700;
+  color: var(--text);
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.tweet-author:hover {
+  text-decoration: underline;
+}
+
+.tweet-time {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.tweet-content {
+  /* Preserve the line breaks a user typed, and wrap long words. */
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  margin-bottom: 0.6rem;
+}
+
+.tweet-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* The like button is a plain text button, not a pill, so it's unobtrusive. */
+.like-button,
+.delete-button {
+  background: none;
+  color: var(--muted);
+  border: none;
+  border-radius: 0;
+  padding: 0.2rem 0.3rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.like-button:hover {
+  background: none;
+  color: var(--red);
+}
+
+/* When the current user has liked a post, fill the heart red. */
+.like-button.liked {
+  color: var(--red);
+}
+
+.delete-button:hover {
+  background: none;
+  color: var(--red);
+}
+
+.empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 2rem 1rem;
+}
+
+.error {
+  color: var(--red);
+  font-size: 0.9rem;
+  min-height: 1.2rem; /* reserve space so the layout doesn't jump */
+}
+
+/* --- Bottom banner (transient messages) --------------------------- */
+.banner {
+  position: fixed;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--text);
+  color: #fff;
+  padding: 0.6rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
+}
+
+.banner.error {
+  background: var(--red);
+}

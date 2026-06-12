@@ -1,0 +1,16 @@
+{
+  "name": "boontweet",
+  "version": "1.0.0",
+  "description": "BoonTweet - a minimal Twitter clone for a class project.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "pg": "^8.12.0"
+  }
+}

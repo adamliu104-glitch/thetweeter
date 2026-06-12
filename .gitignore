@@ -1,0 +1,5 @@
+# Installed dependencies — re-created by `npm install`, never committed.
+node_modules/
+
+# Local secrets and config — never commit real credentials.
+.env
